@@ -16,8 +16,12 @@
 		<set name="team2">Team 2</set>
         <!-- DefaultTarget : will determine between which channels users will be switch to by default.
             Expected values : 'team', 'squad' or 'off'
-            Default value : 'squad'
+            Default value : 'squad' (if allowed by AllowSquadChannels)
         -->
+        <!-- If this is False then no squad channels will be created -->
+        <set name="AllowSquadChannels">True</set>
+        <!-- If this is True the Red/Blue channels will flip each round to minimize channel changing.-->
+        <set name="SwapChannelsEachRound">True</set>
 		<set name="DefaultTarget">squad</set>
 	</settings>
 	<settings name="commands">
