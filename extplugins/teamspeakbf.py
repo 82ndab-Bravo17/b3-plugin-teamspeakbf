@@ -64,6 +64,8 @@ class TeamspeakbfPlugin(b3.plugin.Plugin):
     TS3AllowSquadChannels = True
     teamBlue = b3.TEAM_BLUE
     teamRed = b3.TEAM_RED
+    channel_codec = 1
+    channel_codec_quality = 7
 
     
     tsconnection = None
@@ -226,6 +228,26 @@ class TeamspeakbfPlugin(b3.plugin.Plugin):
             self.info('teamspeakChannels::AllowSquadChannels : \'%s\'' % self.TS3AllowSquadChannels)
         except:
             self.info('Cannot get teamspeakChannels::AllowSquadChannels from config file, using default : %s' % self.TS3AllowSquadChannels)
+            
+        try:
+            self.channel_codec = self.config.getint('teamspeakChannels', 'channel_codec')
+            if self.channel_codec > 2:
+                self.channel_codec = 2
+            if self.channel_codec < 0:
+                self.channel_codec = 0
+            self.info('teamspeakChannels::codec : \'%s\'' % self.channel_codec)
+        except:
+            self.info('Cannot get teamspeakChannels::codec from config file, using default : %s' % self.channel_codec)
+
+        try:
+            self.channel_codec_quality = self.config.getint('teamspeakChannels', 'channel_codec_quality')
+            if self.channel_codec_quality > 10:
+                self.channel_codec_quality = 10
+            if self.channel_codec_quality < 0:
+                self.channel_codec_quality = 0
+            self.info('teamspeakChannels::codec quality : \'%s\'' % self.channel_codec_quality)
+        except:
+            self.info('Cannot get teamspeakChannels::codec quality from config file, using default : %s' % self.channel_codec_quality)
 
         try:
             _target = self.config.get('teamspeakChannels', 'DefaultTarget')
@@ -554,7 +576,9 @@ class TeamspeakbfPlugin(b3.plugin.Plugin):
             self.info('creating channel [%s]' % self.TS3ChannelB3)
             response = self.tsSendCommand('channelcreate',
                                                               {'channel_name': self.TS3ChannelB3
-                                                               , 'channel_flag_semi_permanent': 1})
+                                                               , 'channel_flag_semi_permanent': 1
+                                                               , 'channel_codec': self.channel_codec
+                                                               , 'channel_codec_quality': self.channel_codec_quality})
             self.debug(response)
             self.tsChannelIdB3 = response['cid']
             
@@ -565,7 +589,9 @@ class TeamspeakbfPlugin(b3.plugin.Plugin):
             response = self.tsSendCommand('channelcreate',
                                                               {'channel_name': self.TS3ChannelTeam1,
                                                                'cpid': self.tsChannelIdB3
-                                                               , 'channel_flag_semi_permanent': 1})
+                                                               , 'channel_flag_semi_permanent': 1
+                                                               , 'channel_codec': self.channel_codec
+                                                               , 'channel_codec_quality': self.channel_codec_quality})
             self.debug(response)
             self.tsChannelIdTeam1 = response['cid']
         self.tsChannelIdSquadsTeam1[0] = self.tsChannelIdTeam1
@@ -576,7 +602,9 @@ class TeamspeakbfPlugin(b3.plugin.Plugin):
             response = self.tsSendCommand('channelcreate',
                                                               {'channel_name': self.TS3ChannelTeam2,
                                                                'cpid': self.tsChannelIdB3
-                                                               , 'channel_flag_semi_permanent': 1})
+                                                               , 'channel_flag_semi_permanent': 1
+                                                               , 'channel_codec': self.channel_codec
+                                                               , 'channel_codec_quality': self.channel_codec_quality})
             self.debug(response)
             self.tsChannelIdTeam2 = response['cid']
         self.tsChannelIdSquadsTeam2[0] = self.tsChannelIdTeam2
@@ -624,7 +652,9 @@ class TeamspeakbfPlugin(b3.plugin.Plugin):
         response = self.tsSendCommand('channelcreate',
                                   {'channel_name': channelName,
                                    'cpid': parentChannelId
-                                   , 'channel_flag_semi_permanent': 1})
+                                   , 'channel_flag_semi_permanent': 1
+                                   , 'channel_codec': self.channel_codec
+                                   , 'channel_codec_quality': self.channel_codec_quality})
         return response['cid']
 
             
