@@ -37,6 +37,12 @@
 # * default switch target (squad or team) can be specified in the config file (thanks to 82ndab-Bravo17)
 # 2011/12/18 - 2.3.1
 # * default switch target can also be 'off'
+# 2012/04/29 - 2.3.2
+# * Allow main B3 Auto channel to be permanent to preserve TS tree
+# * Allow creation of only Team channels to cut down on number of channels
+# * Allow B3 Team channel flip/flop each round to keep in sync with BF3 Team flip/flop and cut
+# *     down on channel switching
+# * Allow Codec and Voice Quality to be set in the xml
 #
 __version__ = '2.3.1'
 __author__ = 'Courgette'
@@ -57,6 +63,7 @@ class TeamspeakbfPlugin(b3.plugin.Plugin):
     TS3ServerID = None
     TS3Login = None
     TS3Password = None
+    B3Channel_Permanent = False
     TS3ChannelB3 = 'B3 autoswitched channels'
     TS3ChannelTeam1 = 'Team A'
     TS3ChannelTeam2 = 'Team B'
@@ -203,8 +210,13 @@ class TeamspeakbfPlugin(b3.plugin.Plugin):
         except:
             self.error('Cannot get teamspeak password from config file')
             raise SystemExit('invalid teamspeak configuration')
-      
-        
+
+        try:
+            self.B3Channel_Permanent = self.config.getboolean('teamspeakChannels', 'B#_Chanel_Permanent')
+            self.info('teamspeakChannels::B3 Channel Permanent : \'%s\'' % self.B3Channel_Permanent)
+        except:
+            self.info('Cannot get teamspeakChannels::B3 Channel Permanent from config file, using default : %s' % self.B3Channel_Permanent)
+
         try:
             self.TS3ChannelB3 = self.config.get('teamspeakChannels', 'B3')
             self.info('teamspeakChannels::B3 : \'%s\'' % self.TS3ChannelB3)
@@ -623,7 +635,12 @@ class TeamspeakbfPlugin(b3.plugin.Plugin):
             
     def tsDeleteChannels(self):
         if self.connected:
-            self.tsSendCommand('channeldelete', {'cid': self.tsChannelIdB3, 'force': 1})
+            if self.B3Channel_Permanent:
+                self.tsSendCommand('channeldelete', {'cid': self.tsChannelIdTeam1, 'force': 1})
+                self.tsSendCommand('channeldelete', {'cid': self.tsChannelITeam2, 'force': 1})
+            else:
+                self.tsSendCommand('channeldelete', {'cid': self.tsChannelIdB3, 'force': 1})
+
             self.tsChannelIdB3 = None
             self.tsChannelIdTeam1 = None
             self.tsChannelIdTeam2 = None
